@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-from backend.database import engine
+from database import engine
 
 app = FastAPI(title="MarketLens API")
 

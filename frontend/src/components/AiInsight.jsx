@@ -1,4 +1,5 @@
 import { Sparkles } from "lucide-react";
+import React from "react";
 
 const AiInsight = ({
   title,

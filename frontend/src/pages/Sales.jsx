@@ -1,5 +1,6 @@
 import ChartCard from "../components/ChartCard";
 import KpiCard from "../components/KpiCard";
+import React from "react";
 
 import {
   DollarSign,

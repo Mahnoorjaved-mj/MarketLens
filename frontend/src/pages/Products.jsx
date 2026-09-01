@@ -1,4 +1,5 @@
 import ChartCard from "../components/ChartCard";
+import React from "react";
 
 const Products = () => {
   const products = [

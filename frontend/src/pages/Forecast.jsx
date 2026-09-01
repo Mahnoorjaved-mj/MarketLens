@@ -1,5 +1,5 @@
 import ChartCard from "../components/ChartCard";
-
+import React from "react";
 const Forecast = () => {
   return (
     <div className="dashboard-page">
