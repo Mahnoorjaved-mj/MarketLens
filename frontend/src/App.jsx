@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
@@ -12,53 +12,28 @@ import Forecast from "./pages/Forecast";
 import "./index.css";
 
 function App() {
-  const [activePage, setActivePage] = useState("Overview");
-
-  const renderPage = () => {
-    switch (activePage) {
-      case "Overview":
-        return <Overview />;
-
-      case "Sales Intelligence":
-        return <Sales />;
-
-      case "Customers":
-        return <Customers />;
-
-      case "Products":
-        return <Products />;
-
-      case "Forecast":
-        return <Forecast />;
-
-      default:
-        return <Overview />;
-    }
-  };
-
   return (
-    <div className="app">
+    <BrowserRouter>
+      <div className="app-layout">
 
-      <Sidebar
-        activePage={activePage}
-        setActivePage={setActivePage}
-      />
+        <Sidebar />
 
-      <main className="main-content">
+        <main className="main-content">
+          <Topbar />
 
-        <Topbar
-          page={activePage}
-          userName="Mahnoor"
-          role="Data Analyst"
-        />
+          <div className="page-content">
+            <Routes>
+              <Route path="/" element={<Overview />} />
+              <Route path="/sales" element={<Sales />} />
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/forecast" element={<Forecast />} />
+            </Routes>
+          </div>
+        </main>
 
-        <section className="page-container">
-          {renderPage()}
-        </section>
-
-      </main>
-
-    </div>
+      </div>
+    </BrowserRouter>
   );
 }
 

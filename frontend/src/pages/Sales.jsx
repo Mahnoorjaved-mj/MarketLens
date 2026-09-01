@@ -1,357 +1,106 @@
-import { useEffect, useState } from "react";
+import ChartCard from "../components/ChartCard";
+import KpiCard from "../components/KpiCard";
 
 import {
-  getSalesData,
-  formatPKR,
-  formatNumber,
-  pct,
-} from "../services/api";
+  DollarSign,
+  TrendingUp,
+  Receipt,
+  BarChart3,
+} from "lucide-react";
 
-export default function Sales() {
-
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const load = async () => {
-
-    setLoading(true);
-
-    try {
-      setData(await getSalesData());
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  const trend = data?.monthly_sales || [];
-
-  const max = Math.max(
-    ...trend.map((x) => Number(x.value || 0)),
-    1
-  );
-
+const Sales = () => {
   return (
-    <main className="page">
+    <div className="dashboard-page">
 
-      <div className="page-head">
+      <div className="page-header">
 
         <div>
-
-          <span className="eyebrow">
+          <span className="page-eyebrow">
             SALES ANALYTICS
           </span>
 
           <h1>Sales Intelligence</h1>
 
           <p>
-            Understand revenue movement,
-            category performance and growth.
+            Analyze revenue, profit trends and sales performance.
           </p>
-
         </div>
-
-        <button
-          className="primary-btn"
-          onClick={load}
-        >
-          ↻ Refresh Data
-        </button>
 
       </div>
 
 
-      <section className="kpi-grid">
+      <div className="kpi-grid">
 
-        <Kpi
+        <KpiCard
           title="Total Revenue"
-          value={
-            loading
-              ? "—"
-              : formatPKR(data?.total_revenue)
-          }
-          note="Recorded sales revenue"
-          icon="$"
+          value="$2.30M"
+          change="+12.8%"
+          icon={<DollarSign />}
         />
 
-        <Kpi
-          title="Total Orders"
-          value={
-            loading
-              ? "—"
-              : formatNumber(data?.total_orders)
-          }
-          note="Completed transactions"
-          icon="↗"
+        <KpiCard
+          title="Gross Profit"
+          value="$286K"
+          change="+8.4%"
+          icon={<TrendingUp />}
         />
 
-        <Kpi
+        <KpiCard
           title="Average Order Value"
-          value={
-            loading
-              ? "—"
-              : formatPKR(
-                  data?.average_order_value
-                )
-          }
-          note="Revenue generated per order"
-          icon="A"
+          value="$458"
+          change="+5.3%"
+          icon={<Receipt />}
         />
 
-        <Kpi
-          title="Growth Rate"
-          value={
-            loading
-              ? "—"
-              : pct(data?.growth_rate)
-          }
-          note="Latest month vs previous month"
-          icon="%"
+        <KpiCard
+          title="Sales Growth"
+          value="18.2%"
+          change="+3.4%"
+          icon={<BarChart3 />}
         />
 
-      </section>
-
-
-      <section className="two-col">
-
-        <article className="card">
-
-          <div className="card-head">
-
-            <div>
-
-              <span className="eyebrow">
-                SALES PERFORMANCE
-              </span>
-
-              <h2>Monthly Revenue</h2>
-
-              <p>
-                Last 12 available months.
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="bar-chart tall">
-
-            {trend.map((item, index) => {
-
-              const value =
-                Number(item.value || 0);
-
-              return (
-                <div
-                  className="bar-wrap"
-                  key={index}
-                >
-
-                  <div className="bar-value">
-                    {formatPKR(value)}
-                  </div>
-
-                  <div
-                    className="bar"
-                    style={{
-                      height: `${Math.max(
-                        8,
-                        (value / max) * 210
-                      )}px`,
-                    }}
-                  />
-
-                  <small>
-                    {item.label}
-                  </small>
-
-                </div>
-              );
-            })}
-
-          </div>
-
-        </article>
-
-
-        <article className="card">
-
-          <div className="card-head">
-
-            <div>
-
-              <span className="eyebrow">
-                BREAKDOWN
-              </span>
-
-              <h2>Sales by Category</h2>
-
-              <p>
-                Revenue contribution by category.
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="category-list">
-
-            {(data?.categories || []).map(
-              (item, index) => (
-
-                <div
-                  className="category-row"
-                  key={index}
-                >
-
-                  <div className="category-info">
-
-                    <strong>
-                      {item.category}
-                    </strong>
-
-                    <span>
-                      {formatPKR(item.revenue)}
-                    </span>
-
-                  </div>
-
-                  <div className="meter">
-
-                    <i
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          Number(item.percent || 0)
-                        )}%`,
-                      }}
-                    />
-
-                  </div>
-
-                  <b>
-                    {pct(item.percent)}
-                  </b>
-
-                </div>
-
-              )
-            )}
-
-          </div>
-
-        </article>
-
-      </section>
-
-
-      <article className="card">
-
-        <div className="card-head">
-
-          <div>
-
-            <span className="eyebrow">
-              REGIONAL PERFORMANCE
-            </span>
-
-            <h2>Revenue by Region</h2>
-
-            <p>
-              Compare revenue and profit across
-              business regions.
-            </p>
-
-          </div>
-
-        </div>
-
-        <div className="region-grid">
-
-          {(data?.regions || []).map(
-            (region, index) => (
-
-              <div
-                className="region-card"
-                key={index}
-              >
-
-                <span>
-                  {region.region}
-                </span>
-
-                <strong>
-                  {formatPKR(region.revenue)}
-                </strong>
-
-                <small>
-                  Profit{" "}
-                  {formatPKR(region.profit)}
-                </small>
-
-                <div className="meter">
-
-                  <i
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        (
-                          Number(region.revenue || 0) /
-                          Math.max(
-                            ...(data?.regions || []).map(
-                              (x) =>
-                                Number(x.revenue || 0)
-                            ),
-                            1
-                          )
-                        ) * 100
-                      )}%`,
-                    }}
-                  />
-
-                </div>
-
-              </div>
-
-            )
-          )}
-
-        </div>
-
-      </article>
-
-    </main>
-  );
-}
-
-
-function Kpi({
-  title,
-  value,
-  note,
-  icon,
-}) {
-  return (
-    <article className="card kpi">
-
-      <div className="kpi-top">
-        <span>{title}</span>
-
-        <div className="kpi-icon">
-          {icon}
-        </div>
       </div>
 
-      <h2>{value}</h2>
 
-      <p>{note}</p>
+      <div className="two-column-grid">
 
-    </article>
+        <ChartCard
+          title="Revenue Trend"
+          subtitle="Monthly sales performance"
+        >
+          <div className="big-chart">
+            <div className="fake-chart-bars">
+              {[45, 60, 52, 70, 78, 92, 84, 100].map(
+                (height, index) => (
+                  <div
+                    key={index}
+                    style={{ height: `${height}%` }}
+                  ></div>
+                )
+              )}
+            </div>
+          </div>
+        </ChartCard>
+
+
+        <ChartCard
+          title="Sales Distribution"
+          subtitle="Performance by segment"
+        >
+
+          <div className="donut-placeholder">
+            <div className="donut-center">
+              <strong>2.30M</strong>
+              <span>Total Sales</span>
+            </div>
+          </div>
+
+        </ChartCard>
+
+      </div>
+
+    </div>
   );
-}
+};
+
+export default Sales;

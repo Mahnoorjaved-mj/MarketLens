@@ -1,43 +1,23 @@
-import React from "react";
+import { Sparkles } from "lucide-react";
 
-export default function AIInsight({
-  title = "AI Business Insight",
+const AiInsight = ({
+  title,
   text,
-  label = "AI INSIGHT",
-  icon = "✦",
-  action,
-}) {
+}) => {
   return (
-    <section className="ai-insight-card">
+    <div className="ai-insight">
 
-      <div className="ai-insight-icon">
-        {icon}
+      <div className="ai-icon">
+        <Sparkles size={20} />
       </div>
 
-      <div className="ai-insight-content">
-
-        <span className="ai-insight-label">
-          {label}
-        </span>
-
-        <h3>{title}</h3>
-
-        <p>
-          {text ||
-            "AI analysis will appear here based on the connected business data."}
-        </p>
-
+      <div>
+        <h4>{title}</h4>
+        <p>{text}</p>
       </div>
 
-      {action && (
-        <button
-          className="ai-insight-action"
-          onClick={action.onClick}
-        >
-          {action.label}
-        </button>
-      )}
-
-    </section>
+    </div>
   );
-}
+};
+
+export default AiInsight;

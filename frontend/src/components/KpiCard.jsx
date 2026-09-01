@@ -1,48 +1,39 @@
-import React from "react";
-
-export default function KpiCard({
+const KpiCard = ({
   title,
   value,
-  note,
-  icon = "•",
-  trend,
-  trendType = "neutral",
-}) {
+  change,
+  positive = true,
+  icon,
+}) => {
   return (
-    <article className="kpi-card">
+    <div className="kpi-card">
 
-      <div className="kpi-card-top">
-
-        <div className="kpi-title">
-          <span>{title}</span>
-        </div>
+      <div className="kpi-top">
 
         <div className="kpi-icon">
           {icon}
         </div>
 
+        <span
+          className={`kpi-change ${
+            positive ? "positive" : "negative"
+          }`}
+        >
+          {change}
+        </span>
+
       </div>
 
       <div className="kpi-value">
-        {value ?? "—"}
+        {value}
       </div>
 
-      <div className="kpi-bottom">
-
-        <span className="kpi-note">
-          {note}
-        </span>
-
-        {trend && (
-          <span className={`kpi-trend ${trendType}`}>
-            {trendType === "up" && "↗"}
-            {trendType === "down" && "↘"}
-            {trend}
-          </span>
-        )}
-
+      <div className="kpi-title">
+        {title}
       </div>
 
-    </article>
+    </div>
   );
-}
+};
+
+export default KpiCard;

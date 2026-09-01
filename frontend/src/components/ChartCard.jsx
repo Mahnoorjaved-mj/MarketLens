@@ -1,39 +1,25 @@
-import React from "react";
-
-export default function ChartCard({
-  eyebrow,
+const ChartCard = ({
   title,
-  description,
+  subtitle,
   children,
-  action,
   className = "",
-}) {
+}) => {
   return (
-    <article className={`chart-card ${className}`}>
+    <div className={`report-card ${className}`}>
 
-      <div className="chart-card-header">
+      <div className="report-card-header">
 
         <div>
+          <h3>{title}</h3>
 
-          {eyebrow && (
-            <span className="chart-eyebrow">
-              {eyebrow}
-            </span>
+          {subtitle && (
+            <p>{subtitle}</p>
           )}
-
-          <h2>{title}</h2>
-
-          {description && (
-            <p>{description}</p>
-          )}
-
         </div>
 
-        {action && (
-          <div className="chart-action">
-            {action}
-          </div>
-        )}
+        <button className="chart-menu">
+          •••
+        </button>
 
       </div>
 
@@ -41,6 +27,8 @@ export default function ChartCard({
         {children}
       </div>
 
-    </article>
+    </div>
   );
-}
+};
+
+export default ChartCard;

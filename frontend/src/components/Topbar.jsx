@@ -1,54 +1,39 @@
-import { Bell, Search } from "lucide-react";
+import {
+  Search,
+  Bell,
+} from "lucide-react";
 
-export default function Topbar({
-  page = "Overview",
-  userName = "Mahnoor",
-  role = "Data Analyst"
-}) {
-
+const Topbar = () => {
   return (
     <header className="topbar">
 
       <div className="breadcrumb">
-
-        <span className="breadcrumb-muted">
-          MarketLens
-        </span>
-
-        <span className="breadcrumb-slash">
-          /
-        </span>
-
-        <strong>
-          {page}
-        </strong>
-
+        MarketLens
+        <span>/</span>
+        <strong>Analytics Workspace</strong>
       </div>
 
       <div className="topbar-right">
 
-        <div className="topbar-search">
-          <Search size={16}/>
+        <div className="search-box">
+          <Search size={18} />
           <span>Business Intelligence</span>
         </div>
 
-        <button
-          className="notification-btn"
-          aria-label="Notifications"
-        >
-          <Bell size={18}/>
-          <i/>
+        <button className="notification-btn">
+          <Bell size={19} />
+          <span></span>
         </button>
 
-        <div className="topbar-profile">
+        <div className="profile">
 
-          <div className="topbar-avatar">
-            {userName.charAt(0)}
+          <div className="profile-avatar">
+            M
           </div>
 
-          <div className="topbar-user">
-            <strong>{userName}</strong>
-            <span>{role}</span>
+          <div>
+            <strong>Mahnoor</strong>
+            <small>Data Analyst</small>
           </div>
 
         </div>
@@ -57,4 +42,6 @@ export default function Topbar({
 
     </header>
   );
-}
+};
+
+export default Topbar;

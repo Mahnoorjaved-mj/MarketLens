@@ -1,361 +1,109 @@
-import { useEffect, useState } from "react";
+import ChartCard from "../components/ChartCard";
+import KpiCard from "../components/KpiCard";
 
 import {
-  getCustomersData,
-  formatPKR,
-  formatNumber,
-  pct,
-} from "../services/api";
+  Users,
+  UserPlus,
+  Repeat,
+  Star,
+} from "lucide-react";
 
-export default function Customers() {
-
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const load = async () => {
-
-    setLoading(true);
-
-    try {
-      setData(await getCustomersData());
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  const segments = data?.segments || [];
-
-  const maxSegment = Math.max(
-    ...segments.map((x) => Number(x.count || 0)),
-    1
-  );
-
+const Customers = () => {
   return (
-    <main className="page">
+    <div className="dashboard-page">
 
-      <div className="page-head">
+      <div className="page-header">
 
         <div>
-
-          <span className="eyebrow">
-            CUSTOMER ANALYTICS
+          <span className="page-eyebrow">
+            CUSTOMER INTELLIGENCE
           </span>
 
-          <h1>Customer Intelligence</h1>
+          <h1>Customer Analytics</h1>
 
           <p>
-            Understand customer value,
-            segmentation and performance.
+            Understand customer behavior, retention and value.
           </p>
-
         </div>
-
-        <button
-          className="primary-btn"
-          onClick={load}
-        >
-          ↻ Refresh Data
-        </button>
 
       </div>
 
 
-      <section className="kpi-grid">
+      <div className="kpi-grid">
 
-        <Kpi
+        <KpiCard
           title="Total Customers"
-          value={
-            loading
-              ? "—"
-              : formatNumber(
-                  data?.total_customers
-                )
-          }
-          note="Unique customers in dataset"
-          icon="♙"
+          value="793"
+          change="+6.7%"
+          icon={<Users />}
         />
 
-        <Kpi
-          title="Active Customers"
-          value={
-            loading
-              ? "—"
-              : formatNumber(
-                  data?.active_customers
-                )
-          }
-          note="Customers with recorded activity"
-          icon="●"
-        />
-
-        <Kpi
+        <KpiCard
           title="New Customers"
-          value="—"
-          note="Requires customer acquisition dates"
-          icon="+"
+          value="142"
+          change="+12.3%"
+          icon={<UserPlus />}
         />
 
-        <Kpi
-          title="Customer Value"
-          value={
-            loading
-              ? "—"
-              : formatPKR(
-                  data?.customer_value
-                )
-          }
-          note="Average revenue per customer"
-          icon="Rs"
+        <KpiCard
+          title="Retention Rate"
+          value="87.4%"
+          change="+4.2%"
+          icon={<Repeat />}
         />
 
-      </section>
+        <KpiCard
+          title="Customer Satisfaction"
+          value="4.8"
+          change="+0.4%"
+          icon={<Star />}
+        />
 
-
-      <section className="two-col">
-
-        <article className="card">
-
-          <div className="card-head">
-
-            <div>
-
-              <span className="eyebrow">
-                SEGMENTATION
-              </span>
-
-              <h2>Customer Distribution</h2>
-
-              <p>
-                Customers grouped by segment.
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="segment-chart">
-
-            {segments.map((segment, index) => {
-
-              const count =
-                Number(segment.count || 0);
-
-              return (
-                <div
-                  className="segment-chart-row"
-                  key={index}
-                >
-
-                  <div className="segment-label">
-
-                    <strong>
-                      {segment.name}
-                    </strong>
-
-                    <span>
-                      {formatNumber(count)}
-                      {" "}customers
-                    </span>
-
-                  </div>
-
-                  <div className="segment-track">
-
-                    <div
-                      style={{
-                        width: `${
-                          (count / maxSegment) * 100
-                        }%`,
-                      }}
-                    />
-
-                  </div>
-
-                  <b>
-                    {pct(segment.percent)}
-                  </b>
-
-                </div>
-              );
-            })}
-
-          </div>
-
-        </article>
-
-
-        <article className="card">
-
-          <div className="card-head">
-
-            <div>
-
-              <span className="eyebrow">
-                CUSTOMER VALUE
-              </span>
-
-              <h2>Segment Revenue</h2>
-
-              <p>
-                Revenue contribution from
-                each customer segment.
-              </p>
-
-            </div>
-
-          </div>
-
-          <div className="segment-revenue">
-
-            {segments.map((segment, index) => (
-
-              <div
-                className="segment-revenue-row"
-                key={index}
-              >
-
-                <div>
-
-                  <strong>
-                    {segment.name}
-                  </strong>
-
-                  <span>
-                    {formatNumber(
-                      segment.count
-                    )} customers
-                  </span>
-
-                </div>
-
-                <b>
-                  {formatPKR(
-                    segment.revenue
-                  )}
-                </b>
-
-              </div>
-
-            ))}
-
-          </div>
-
-        </article>
-
-      </section>
-
-
-      <article className="card table-card">
-
-        <div className="card-head">
-
-          <div>
-
-            <span className="eyebrow">
-              CUSTOMER PERFORMANCE
-            </span>
-
-            <h2>Top Customers</h2>
-
-            <p>
-              Highest-value customers ranked
-              by revenue.
-            </p>
-
-          </div>
-
-        </div>
-
-        <div className="table-wrap">
-
-          <table>
-
-            <thead>
-              <tr>
-                <th>CUSTOMER</th>
-                <th>ORDERS</th>
-                <th>REVENUE</th>
-                <th>STATUS</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {(data?.top_customers || []).map(
-                (item, index) => (
-
-                  <tr key={index}>
-
-                    <td>
-                      <strong>
-                        {item.customer}
-                      </strong>
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        item.orders
-                      )}
-                    </td>
-
-                    <td className="money">
-                      {formatPKR(
-                        item.revenue
-                      )}
-                    </td>
-
-                    <td>
-                      <span className="status-pill">
-                        Active
-                      </span>
-                    </td>
-
-                  </tr>
-
-                )
-              )}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </article>
-
-    </main>
-  );
-}
-
-
-function Kpi({
-  title,
-  value,
-  note,
-  icon,
-}) {
-  return (
-    <article className="card kpi">
-
-      <div className="kpi-top">
-        <span>{title}</span>
-
-        <div className="kpi-icon">
-          {icon}
-        </div>
       </div>
 
-      <h2>{value}</h2>
 
-      <p>{note}</p>
+      <div className="two-column-grid">
 
-    </article>
+        <ChartCard
+          title="Customer Growth"
+          subtitle="Customer acquisition over time"
+        >
+          <div className="customer-growth-chart">
+            <div className="growth-line"></div>
+          </div>
+        </ChartCard>
+
+
+        <ChartCard
+          title="Customer Segments"
+          subtitle="Distribution by segment"
+        >
+
+          <div className="segment-list">
+
+            <div>
+              <span>Consumer</span>
+              <strong>52%</strong>
+            </div>
+
+            <div>
+              <span>Corporate</span>
+              <strong>31%</strong>
+            </div>
+
+            <div>
+              <span>Home Office</span>
+              <strong>17%</strong>
+            </div>
+
+          </div>
+
+        </ChartCard>
+
+      </div>
+
+    </div>
   );
-}
+};
+
+export default Customers;

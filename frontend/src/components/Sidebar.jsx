@@ -1,20 +1,41 @@
+import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
   ChartNoAxesCombined,
   Users,
   Package,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Overview" },
-  { icon: ChartNoAxesCombined, label: "Sales Intelligence" },
-  { icon: Users, label: "Customers" },
-  { icon: Package, label: "Products" },
-  { icon: Sparkles, label: "Forecast" },
-];
+const Sidebar = () => {
+  const menuItems = [
+    {
+      name: "Overview",
+      path: "/",
+      icon: <LayoutDashboard size={19} />,
+    },
+    {
+      name: "Sales Intelligence",
+      path: "/sales",
+      icon: <ChartNoAxesCombined size={19} />,
+    },
+    {
+      name: "Customers",
+      path: "/customers",
+      icon: <Users size={19} />,
+    },
+    {
+      name: "Products",
+      path: "/products",
+      icon: <Package size={19} />,
+    },
+    {
+      name: "Forecast",
+      path: "/forecast",
+      icon: <Sparkles size={19} />,
+    },
+  ];
 
-function Sidebar({ activePage, setActivePage }) {
   return (
     <aside className="sidebar">
 
@@ -24,72 +45,51 @@ function Sidebar({ activePage, setActivePage }) {
           M
         </div>
 
-        <div className="brand-info">
+        <div>
           <h2>MarketLens</h2>
           <span>Analytics Platform</span>
         </div>
 
       </div>
 
-      <div className="sidebar-nav">
-
-        <p className="nav-title">
-          ANALYTICS
-        </p>
-
-        <nav>
-
-          {menuItems.map(
-            ({ icon: Icon, label }) => (
-
-              <button
-                key={label}
-                className={`nav-item ${
-                  activePage === label ? "active" : ""
-                }`}
-                onClick={() => setActivePage(label)}
-              >
-
-                <span className="nav-icon">
-                  <Icon
-                    size={17}
-                    strokeWidth={2.2}
-                  />
-                </span>
-
-                <span className="nav-text">
-                  {label}
-                </span>
-
-                {activePage === label && (
-                  <span className="nav-active-dot">
-                    •
-                  </span>
-                )}
-
-              </button>
-
-            )
-          )}
-
-        </nav>
-
+      <div className="sidebar-section-title">
+        ANALYTICS
       </div>
+
+      <nav className="sidebar-menu">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.path}
+            end={item.path === "/"}
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active" : ""}`
+            }
+          >
+            {item.icon}
+            <span>{item.name}</span>
+
+            {item.name === "Overview" && (
+              <div className="active-dot"></div>
+            )}
+          </NavLink>
+        ))}
+      </nav>
 
       <div className="sidebar-bottom">
 
-        <div className="data-status">
+        <div className="connection-card">
 
-          <span className="status-dot"/>
+          <div className="connection-dot"></div>
 
           <div>
             <strong>Data Connected</strong>
-            <small>PostgreSQL + Power BI</small>
+            <span>PostgreSQL + Power BI</span>
           </div>
 
         </div>
 
-        <div className="sidebar-user">
+        <div className="user-card">
 
           <div className="user-avatar">
             M
@@ -97,7 +97,7 @@ function Sidebar({ activePage, setActivePage }) {
 
           <div>
             <strong>Mahnoor</strong>
-            <small>Data Analyst</small>
+            <span>Data Analyst</span>
           </div>
 
         </div>
@@ -106,6 +106,6 @@ function Sidebar({ activePage, setActivePage }) {
 
     </aside>
   );
-}
+};
 
 export default Sidebar;

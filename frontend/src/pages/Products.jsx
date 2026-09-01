@@ -1,318 +1,130 @@
-import { useEffect, useState } from "react";
+import ChartCard from "../components/ChartCard";
 
-import {
-  getProductsData,
-  formatPKR,
-  formatNumber,
-  pct,
-} from "../services/api";
-
-export default function Products() {
-
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  const load = async () => {
-
-    setLoading(true);
-
-    try {
-      setData(await getProductsData());
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-
-  };
-
-  useEffect(() => {
-    load();
-  }, []);
-
-  const products = data?.products || [];
+const Products = () => {
+  const products = [
+    {
+      name: "Canon ImageCLASS",
+      sales: "$61.6K",
+      growth: "+18.4%",
+    },
+    {
+      name: "Fellowes PB500",
+      sales: "$27.4K",
+      growth: "+14.2%",
+    },
+    {
+      name: "HP LaserJet",
+      sales: "$25.8K",
+      growth: "+10.8%",
+    },
+    {
+      name: "Cisco Router",
+      sales: "$23.6K",
+      growth: "+8.9%",
+    },
+  ];
 
   return (
-    <main className="page">
+    <div className="dashboard-page">
 
-      <div className="page-head">
+      <div className="page-header">
 
         <div>
-
-          <span className="eyebrow">
-            PRODUCT ANALYTICS
+          <span className="page-eyebrow">
+            PRODUCT PERFORMANCE
           </span>
 
-          <h1>Product Performance</h1>
+          <h1>Products Intelligence</h1>
 
           <p>
-            Discover the products driving
-            revenue and business growth.
+            Track product performance and identify top revenue drivers.
           </p>
-
         </div>
-
-        <button
-          className="primary-btn"
-          onClick={load}
-        >
-          ↻ Refresh Data
-        </button>
 
       </div>
 
 
-      <section className="kpi-grid">
+      <ChartCard
+        title="Product Performance"
+        subtitle="Top products ranked by sales"
+      >
 
-        <Kpi
-          title="Total Products"
-          value={
-            loading
-              ? "—"
-              : formatNumber(
-                  data?.total_products
-                )
-          }
-          note="Products in connected dataset"
-          icon="▦"
-        />
+        <div className="product-performance-list">
 
-        <Kpi
-          title="Best Seller"
-          value={
-            loading
-              ? "—"
-              : data?.best_seller || "—"
-          }
-          note="Highest revenue product"
-          icon="★"
-        />
+          {products.map((product) => (
+            <div
+              className="product-performance-item"
+              key={product.name}
+            >
 
-        <Kpi
-          title="Top Product Revenue"
-          value={
-            loading
-              ? "—"
-              : formatPKR(
-                  data?.top_product_revenue
-                )
-          }
-          note="Revenue from leading product"
-          icon="Rs"
-        />
-
-        <Kpi
-          title="Product Contribution"
-          value={
-            loading
-              ? "—"
-              : pct(
-                  data?.top_product_share
-                )
-          }
-          note="Share of total revenue"
-          icon="%"
-        />
-
-      </section>
-
-
-      <article className="card product-leaderboard">
-
-        <div className="card-head">
-
-          <div>
-
-            <span className="eyebrow">
-              PRODUCT LEADERBOARD
-            </span>
-
-            <h2>Top Revenue Products</h2>
-
-            <p>
-              Products ranked by actual
-              PostgreSQL revenue.
-            </p>
-
-          </div>
-
-          <span className="ai-badge">
-            LIVE DATA
-          </span>
-
-        </div>
-
-        <div className="rank-list">
-
-          {products.slice(0, 8).map(
-            (product, index) => (
-
-              <div
-                className="rank-row"
-                key={index}
-              >
-
-                <div className="rank-number">
-                  {String(index + 1).padStart(
-                    2,
-                    "0"
-                  )}
-                </div>
-
-                <div className="rank-content">
-
-                  <div className="rank-title">
-
-                    <strong>
-                      {product.product}
-                    </strong>
-
-                    <span>
-                      {product.category}
-                    </span>
-
-                  </div>
-
-                  <div className="meter">
-
-                    <i
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          product.percent * 4
-                        )}%`,
-                      }}
-                    />
-
-                  </div>
-
-                </div>
-
-                <strong className="rank-money">
-                  {formatPKR(
-                    product.revenue
-                  )}
-                </strong>
-
+              <div className="product-rank">
+                #
               </div>
 
-            )
-          )}
+              <div className="product-name">
+                <strong>{product.name}</strong>
+                <span>High Performing Product</span>
+              </div>
+
+              <strong>{product.sales}</strong>
+
+              <span className="growth-badge">
+                {product.growth}
+              </span>
+
+            </div>
+          ))}
 
         </div>
 
-      </article>
+      </ChartCard>
 
 
-      <article className="card table-card">
+      <div className="two-column-grid">
 
-        <div className="card-head">
+        <ChartCard
+          title="Category Performance"
+          subtitle="Sales contribution"
+        >
 
-          <div>
+          <div className="category-cards">
 
-            <span className="eyebrow">
-              CATALOG PERFORMANCE
-            </span>
+            <div>
+              <span>Technology</span>
+              <strong>$836K</strong>
+            </div>
 
-            <h2>Product Details</h2>
+            <div>
+              <span>Furniture</span>
+              <strong>$742K</strong>
+            </div>
 
-            <p>
-              Detailed product-level sales
-              performance.
-            </p>
+            <div>
+              <span>Office Supplies</span>
+              <strong>$718K</strong>
+            </div>
 
           </div>
 
-        </div>
-
-        <div className="table-wrap">
-
-          <table>
-
-            <thead>
-              <tr>
-                <th>PRODUCT</th>
-                <th>CATEGORY</th>
-                <th>UNITS</th>
-                <th>REVENUE</th>
-                <th>PROFIT</th>
-              </tr>
-            </thead>
-
-            <tbody>
-
-              {products.slice(0, 15).map(
-                (product, index) => (
-
-                  <tr key={index}>
-
-                    <td>
-                      <strong>
-                        {product.product}
-                      </strong>
-                    </td>
-
-                    <td>
-                      {product.category}
-                    </td>
-
-                    <td>
-                      {formatNumber(
-                        product.units_sold
-                      )}
-                    </td>
-
-                    <td className="money">
-                      {formatPKR(
-                        product.revenue
-                      )}
-                    </td>
-
-                    <td className="profit">
-                      {formatPKR(
-                        product.profit
-                      )}
-                    </td>
-
-                  </tr>
-
-                )
-              )}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-      </article>
-
-    </main>
-  );
-}
+        </ChartCard>
 
 
-function Kpi({
-  title,
-  value,
-  note,
-  icon,
-}) {
-  return (
-    <article className="card kpi">
+        <ChartCard
+          title="Product Insights"
+          subtitle="AI-generated intelligence"
+        >
 
-      <div className="kpi-top">
-        <span>{title}</span>
+          <div className="product-insights">
+            Technology products continue to generate the strongest
+            revenue growth across all business categories.
+          </div>
 
-        <div className="kpi-icon">
-          {icon}
-        </div>
+        </ChartCard>
+
       </div>
 
-      <h2>{value}</h2>
-
-      <p>{note}</p>
-
-    </article>
+    </div>
   );
-}
+};
+
+export default Products;
