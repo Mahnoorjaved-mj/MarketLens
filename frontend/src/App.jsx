@@ -1,5 +1,5 @@
-import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import React from "react";
 
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
@@ -9,8 +9,6 @@ import Sales from "./pages/Sales";
 import Customers from "./pages/Customers";
 import Products from "./pages/Products";
 import Forecast from "./pages/Forecast";
-
-import "./index.css";
 
 function App() {
   return (
@@ -31,6 +29,7 @@ function App() {
               <Route path="/forecast" element={<Forecast />} />
             </Routes>
           </div>
+
         </main>
 
       </div>

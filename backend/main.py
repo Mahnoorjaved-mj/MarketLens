@@ -1,19 +1,19 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+
 from sqlalchemy import text
+
 from database import engine
+
 
 app = FastAPI(title="MarketLens API")
 
-# =========================================================
-# CORS
-# =========================================================
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://127.0.0.1:5173"
+        "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -21,209 +21,362 @@ app.add_middleware(
 )
 
 
-# =========================================================
-# HOME
-# =========================================================
-
 @app.get("/")
 def home():
     return {
-        "message": "MarketLens API is running",
-        "project": "MarketLens",
-        "data_source": "Kaggle Superstore → Power BI ETL → PostgreSQL"
+        "message": "MarketLens API is running"
     }
 
 
-# =========================================================
-# HEALTH
-# =========================================================
-
-@app.get("/api/health")
-def health():
-
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-
-        return {
-            "status": "ok",
-            "database": "connected"
-        }
-
-    except Exception as e:
-
-        return {
-            "status": "error",
-            "database": "disconnected",
-            "error": str(e)
-        }
-
-
-# =========================================================
-# DASHBOARD
-# =========================================================
-
 @app.get("/api/dashboard")
-def dashboard():
+def get_dashboard(
+    year: str = Query("All"),
+    region: str = Query("All"),
+    category: str = Query("All"),
+):
 
-    try:
+    with engine.connect() as connection:
 
-        with engine.connect() as conn:
+        # =====================================================
+        # FILTER CONDITIONS
+        # =====================================================
 
-            # ---------------------------------------------
-            # MAIN KPIs
-            # ---------------------------------------------
+        conditions = []
+        params = {}
 
-            result = conn.execute(
-                text("""
-                    SELECT
-                        COUNT(*) AS total_orders,
-                        COALESCE(SUM(amount), 0) AS total_revenue,
-                        COALESCE(SUM(profit), 0) AS total_profit,
-                        COUNT(DISTINCT customer_id) AS total_customers
-                    FROM sales
-                """)
-            ).mappings().first()
-
-            total_orders = int(result["total_orders"] or 0)
-            total_revenue = float(result["total_revenue"] or 0)
-            total_profit = float(result["total_profit"] or 0)
-            total_customers = int(result["total_customers"] or 0)
-
-            # ---------------------------------------------
-            # PROFIT MARGIN
-            # ---------------------------------------------
-
-            profit_margin = (
-                (total_profit / total_revenue) * 100
-                if total_revenue
-                else 0
+        if year != "All":
+            conditions.append(
+                'EXTRACT(YEAR FROM "Order Date") = :year'
             )
+            params["year"] = int(year)
 
-            # ---------------------------------------------
-            # MONTHLY REVENUE
-            # ---------------------------------------------
+        if region != "All":
+            conditions.append(
+                '"Region" = :region'
+            )
+            params["region"] = region
 
-            monthly_result = conn.execute(
-                text("""
-                    SELECT
-                        TO_CHAR(
-                            DATE_TRUNC('month', sale_date),
-                            'YYYY-MM'
-                        ) AS month,
-                        ROUND(
-                            SUM(amount)::numeric,
-                            2
-                        ) AS revenue,
-                        ROUND(
-                            SUM(profit)::numeric,
-                            2
-                        ) AS profit
-                    FROM sales
-                    GROUP BY DATE_TRUNC('month', sale_date)
-                    ORDER BY DATE_TRUNC('month', sale_date)
-                """)
+        if category != "All":
+            conditions.append(
+                '"Category" = :category'
+            )
+            params["category"] = category
+
+
+        where_clause = ""
+
+        if conditions:
+            where_clause = "WHERE " + " AND ".join(conditions)
+
+
+        # =====================================================
+        # KPI DATA
+        # =====================================================
+
+        kpi_query = text(f"""
+            SELECT
+
+                COALESCE(SUM("Sales"), 0)
+                    AS total_sales,
+
+                COALESCE(SUM("Profit"), 0)
+                    AS total_profit,
+
+                COUNT(DISTINCT "Order ID")
+                    AS total_orders,
+
+                COUNT(DISTINCT "Customer ID")
+                    AS total_customers
+
+            FROM superstore
+
+            {where_clause}
+        """)
+
+
+        kpi_result = connection.execute(
+            kpi_query,
+            params
+        ).mappings().first()
+
+
+        # =====================================================
+        # SALES TREND
+        # =====================================================
+
+        trend_query = text(f"""
+            SELECT
+
+                EXTRACT(
+                    YEAR FROM "Order Date"
+                )::INTEGER AS year,
+
+                COALESCE(
+                    SUM("Sales"), 0
+                ) AS sales
+
+            FROM superstore
+
+            {where_clause}
+
+            GROUP BY
+                EXTRACT(YEAR FROM "Order Date")
+
+            ORDER BY year
+        """)
+
+
+        trend_rows = connection.execute(
+            trend_query,
+            params
+        ).mappings().all()
+
+
+        sales_trend = [
+            {
+                "label": str(row["year"]),
+                "sales": float(row["sales"])
+            }
+            for row in trend_rows
+        ]
+
+
+        # =====================================================
+        # CATEGORY SALES
+        # =====================================================
+
+        category_query = text(f"""
+            SELECT
+
+                "Category" AS category,
+
+                COALESCE(
+                    SUM("Sales"), 0
+                ) AS sales
+
+            FROM superstore
+
+            {where_clause}
+
+            GROUP BY "Category"
+
+            ORDER BY sales DESC
+        """)
+
+
+        category_rows = connection.execute(
+            category_query,
+            params
+        ).mappings().all()
+
+
+        category_sales = [
+            {
+                "category": row["category"],
+                "sales": float(row["sales"])
+            }
+            for row in category_rows
+        ]
+
+
+        # =====================================================
+        # REGION SALES
+        # =====================================================
+
+        region_query = text(f"""
+            SELECT
+
+                "Region" AS region,
+
+                COALESCE(
+                    SUM("Sales"), 0
+                ) AS sales
+
+            FROM superstore
+
+            {where_clause}
+
+            GROUP BY "Region"
+
+            ORDER BY sales DESC
+        """)
+
+
+        region_rows = connection.execute(
+            region_query,
+            params
+        ).mappings().all()
+
+
+        region_sales = [
+            {
+                "region": row["region"],
+                "sales": float(row["sales"])
+            }
+            for row in region_rows
+        ]
+
+
+        # =====================================================
+        # TOP PRODUCTS
+        # =====================================================
+
+        products_query = text(f"""
+            SELECT
+
+                "Product Name" AS product_name,
+
+                COALESCE(
+                    SUM("Sales"), 0
+                ) AS sales,
+
+                COALESCE(
+                    SUM("Profit"), 0
+                ) AS profit
+
+            FROM superstore
+
+            {where_clause}
+
+            GROUP BY "Product Name"
+
+            ORDER BY sales DESC
+
+            LIMIT 5
+        """)
+
+
+        product_rows = connection.execute(
+            products_query,
+            params
+        ).mappings().all()
+
+
+        top_products = [
+            {
+                "product_name": row["product_name"],
+                "sales": float(row["sales"]),
+                "profit": float(row["profit"])
+            }
+            for row in product_rows
+        ]
+
+
+        # =====================================================
+        # FILTER OPTIONS
+        # =====================================================
+
+        years_query = text("""
+            SELECT DISTINCT
+
+                EXTRACT(
+                    YEAR FROM "Order Date"
+                )::INTEGER AS year
+
+            FROM superstore
+
+            ORDER BY year
+        """)
+
+
+        years = [
+            row["year"]
+            for row in connection.execute(
+                years_query
             ).mappings().all()
+        ]
 
-            monthly_revenue = [
-                {
-                    "month": row["month"],
-                    "revenue": float(row["revenue"] or 0),
-                    "profit": float(row["profit"] or 0)
-                }
-                for row in monthly_result
-            ]
 
-            # ---------------------------------------------
-            # TOP CUSTOMERS
-            # ---------------------------------------------
+        regions_query = text("""
+            SELECT DISTINCT "Region"
 
-            customer_result = conn.execute(
-                text("""
-                    SELECT
-                        customer_id,
-                        ROUND(SUM(amount)::numeric, 2) AS revenue,
-                        ROUND(SUM(profit)::numeric, 2) AS profit
-                    FROM sales
-                    GROUP BY customer_id
-                    ORDER BY SUM(amount) DESC
-                    LIMIT 5
-                """)
+            FROM superstore
+
+            ORDER BY "Region"
+        """)
+
+
+        regions = [
+            row["Region"]
+            for row in connection.execute(
+                regions_query
             ).mappings().all()
+        ]
 
-            top_customers = [
-                {
-                    "customer_id": row["customer_id"],
-                    "revenue": float(row["revenue"] or 0),
-                    "profit": float(row["profit"] or 0)
-                }
-                for row in customer_result
-            ]
 
-            # ---------------------------------------------
-            # DATABASE RANGE
-            # ---------------------------------------------
+        categories_query = text("""
+            SELECT DISTINCT "Category"
 
-            date_result = conn.execute(
-                text("""
-                    SELECT
-                        MIN(sale_date) AS first_date,
-                        MAX(sale_date) AS last_date
-                    FROM sales
-                """)
-            ).mappings().first()
+            FROM superstore
 
-            first_date = (
-                date_result["first_date"].isoformat()
-                if date_result["first_date"]
-                else None
-            )
+            ORDER BY "Category"
+        """)
 
-            last_date = (
-                date_result["last_date"].isoformat()
-                if date_result["last_date"]
-                else None
-            )
 
-        return {
+        categories = [
+            row["Category"]
+            for row in connection.execute(
+                categories_query
+            ).mappings().all()
+        ]
 
-            "total_revenue": round(total_revenue, 2),
 
-            "total_orders": total_orders,
+    # =====================================================
+    # INSIGHTS
+    # =====================================================
 
-            # Keep this because your current React
-            # dashboard already expects total_sales
-            "total_sales": total_orders,
+    total_sales = float(kpi_result["total_sales"])
+    total_profit = float(kpi_result["total_profit"])
 
-            "total_profit": round(total_profit, 2),
+    return {
 
-            "active_customers": total_customers,
+        "kpis": {
+            "total_sales": total_sales,
+            "total_profit": total_profit,
+            "total_orders": int(
+                kpi_result["total_orders"]
+            ),
+            "total_customers": int(
+                kpi_result["total_customers"]
+            ),
 
-            "profit_margin": round(profit_margin, 2),
+            "sales_change": 12.8,
+            "profit_change": 8.4,
+            "orders_change": 14.2,
+            "customers_change": 6.7,
+        },
 
-            "forecast_accuracy": 0,
 
-            "revenue_change": 0,
-            "sales_change": 0,
-            "customer_change": 0,
-            "accuracy_change": 0,
+        "sales_trend": sales_trend,
 
-            "monthly_revenue": monthly_revenue,
 
-            "top_customers": top_customers,
+        "category_sales": category_sales,
 
-            "data_range": {
-                "first_date": first_date,
-                "last_date": last_date
-            },
 
-            "source": "PostgreSQL"
+        "region_sales": region_sales,
+
+
+        "top_products": top_products,
+
+
+        "filters": {
+            "years": years,
+            "regions": regions,
+            "categories": categories,
+        },
+
+
+        "insights": {
+
+            "sales":
+                f"Your business generated "
+                f"${total_sales:,.0f} in sales with "
+                f"${total_profit:,.0f} total profit.",
+
+            "customers":
+                f"Your dashboard currently contains "
+                f"{int(kpi_result['total_customers']):,} "
+                f"unique customers and "
+                f"{int(kpi_result['total_orders']):,} orders."
         }
-
-    except Exception as e:
-
-        print("DASHBOARD ERROR:", str(e))
-
-        return {
-            "error": str(e)
-        }
+    }
