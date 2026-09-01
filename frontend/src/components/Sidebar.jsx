@@ -99,7 +99,6 @@ const Sidebar = () => {
 
           <div>
             <strong>Mahnoor</strong>
-            <span>Data Analyst</span>
           </div>
 
         </div>

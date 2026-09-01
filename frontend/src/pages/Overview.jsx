@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { RefreshCw, DollarSign, TrendingUp, ShoppingCart, Users } from "lucide-react";
 import KpiCard from "../components/KpiCard";
-import ChartCard from "../components/ChartCard";
 import AiInsight from "../components/AiInsight";
 
 import {
@@ -60,6 +59,12 @@ const Overview = () => {
     setTimeout(() => setRefreshing(false), 900);
   };
 
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
+
   return (
     <div className="dashboard-page">
 
@@ -75,10 +80,13 @@ const Overview = () => {
           </p>
         </div>
 
-        <button className="primary-button" onClick={refreshDashboard} disabled={refreshing}>
-          <RefreshCw size={17} className={refreshing ? "spin-icon" : ""} />
-          {refreshing ? "Refreshing..." : "Refresh Report"}
-        </button>
+        <div className="header-actions">
+          <span className="last-updated">Last updated: {today}</span>
+          <button className="primary-button" onClick={refreshDashboard} disabled={refreshing}>
+            <RefreshCw size={17} className={refreshing ? "spin-icon" : ""} />
+            {refreshing ? "Refreshing..." : "Refresh Report"}
+          </button>
+        </div>
       </div>
 
       {/* ================= KPI ================= */}
@@ -105,100 +113,109 @@ const Overview = () => {
           </div>
         </div>
 
-        {/* Sales by Year - full width */}
-        <div className="report-inner-card">
-          <h4>Total Sales by Year</h4>
-          <div style={{ width: "100%", height: 260 }}>
-            <ResponsiveContainer>
-              <LineChart data={salesByYear}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="year" />
-                <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
-                <Tooltip formatter={(v) => money(v)} />
-                <Line
-                  type="monotone" dataKey="sales" stroke="#6C63FF"
-                  strokeWidth={4} dot={{ r: 5 }} activeDot={{ r: 8 }}
-                  animationDuration={1100}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+        <div className="powerbi-canvas">
 
-        <div className="report-row-3">
-          <div className="report-inner-card">
-            <h4>Total Sales by Category</h4>
-            <div style={{ width: "100%", height: 220 }}>
-              <ResponsiveContainer>
-                <BarChart data={salesByCategory} layout="vertical" margin={{ left: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
-                  <YAxis dataKey="category" type="category" width={90} />
-                  <Tooltip formatter={(v) => money(v)} />
-                  <Bar dataKey="sales" radius={[0, 8, 8, 0]} animationDuration={1100}>
-                    {salesByCategory.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <span className="report-section-label">REVENUE TREND</span>
 
           <div className="report-inner-card">
-            <h4>Total Sales by Region</h4>
-            <div style={{ width: "100%", height: 220 }}>
+            <h4>Total Sales by Year</h4>
+            <div style={{ width: "100%", height: 260 }}>
               <ResponsiveContainer>
-                <BarChart data={salesByRegion} layout="vertical" margin={{ left: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
-                  <YAxis dataKey="region" type="category" width={70} />
-                  <Tooltip formatter={(v) => money(v)} />
-                  <Bar dataKey="sales" radius={[0, 8, 8, 0]} animationDuration={1100}>
-                    {salesByRegion.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        <div className="report-row-2">
-          <div className="report-inner-card">
-            <h4>Total Sales by Product Name</h4>
-            <div style={{ width: "100%", height: 280 }}>
-              <ResponsiveContainer>
-                <BarChart data={salesByProduct} layout="vertical" margin={{ left: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                  <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
-                  <YAxis dataKey="product" type="category" width={140} tick={{ fontSize: 10 }} />
-                  <Tooltip formatter={(v) => money(v)} />
-                  <Bar dataKey="sales" radius={[0, 8, 8, 0]} fill="#6C63FF" animationDuration={1100} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="report-inner-card">
-            <h4>Sum of Profit by Year</h4>
-            <div style={{ width: "100%", height: 280 }}>
-              <ResponsiveContainer>
-                <BarChart data={profitByYear}>
+                <LineChart data={salesByYear}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="year" />
                   <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
                   <Tooltip formatter={(v) => money(v)} />
-                  <Bar dataKey="profit" radius={[8, 8, 0, 0]} animationDuration={1100}>
-                    {profitByYear.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
+                  <Line
+                    type="monotone" dataKey="sales" stroke="#6C63FF"
+                    strokeWidth={4} dot={{ r: 5 }} activeDot={{ r: 8 }}
+                    animationDuration={1100}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
+
+          <span className="report-section-label">BREAKDOWN BY CATEGORY & REGION</span>
+
+          <div className="report-row-3">
+            <div className="report-inner-card">
+              <h4>Total Sales by Category</h4>
+              <div style={{ width: "100%", height: 220 }}>
+                <ResponsiveContainer>
+                  <BarChart data={salesByCategory} layout="vertical" margin={{ left: 10 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+                    <YAxis dataKey="category" type="category" width={90} />
+                    <Tooltip formatter={(v) => money(v)} />
+                    <Bar dataKey="sales" radius={[0, 8, 8, 0]} animationDuration={1100}>
+                      {salesByCategory.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="report-inner-card">
+              <h4>Total Sales by Region</h4>
+              <div style={{ width: "100%", height: 220 }}>
+                <ResponsiveContainer>
+                  <BarChart data={salesByRegion} layout="vertical" margin={{ left: 10 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+                    <YAxis dataKey="region" type="category" width={70} />
+                    <Tooltip formatter={(v) => money(v)} />
+                    <Bar dataKey="sales" radius={[0, 8, 8, 0]} animationDuration={1100}>
+                      {salesByRegion.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <span className="report-section-label">TOP PRODUCTS & PROFIT TREND</span>
+
+          <div className="report-row-2">
+            <div className="report-inner-card">
+              <h4>Total Sales by Product Name</h4>
+              <div style={{ width: "100%", height: 280 }}>
+                <ResponsiveContainer>
+                  <BarChart data={salesByProduct} layout="vertical" margin={{ left: 10 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+                    <YAxis dataKey="product" type="category" width={140} tick={{ fontSize: 10 }} />
+                    <Tooltip formatter={(v) => money(v)} />
+                    <Bar dataKey="sales" radius={[0, 8, 8, 0]} fill="#6C63FF" animationDuration={1100} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="report-inner-card">
+              <h4>Sum of Profit by Year</h4>
+              <div style={{ width: "100%", height: 280 }}>
+                <ResponsiveContainer>
+                  <BarChart data={profitByYear}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="year" />
+                    <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+                    <Tooltip formatter={(v) => money(v)} />
+                    <Bar dataKey="profit" radius={[8, 8, 0, 0]} animationDuration={1100}>
+                      {profitByYear.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </div>
