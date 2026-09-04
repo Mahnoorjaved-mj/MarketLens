@@ -19,7 +19,7 @@ class Customer(Base):
 
 # =========================
 # SALES
-# =========================
+
 class Sale(Base):
     __tablename__ = "sales"
 
