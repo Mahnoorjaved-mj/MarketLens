@@ -480,3 +480,49 @@ def get_forecast():
         return {
             "error": str(error)
         }
+
+    
+@app.get("/api/tables")
+def get_tables():
+
+    query = text("""
+        SELECT table_schema, table_name
+        FROM information_schema.tables
+        WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
+        ORDER BY table_schema, table_name;
+    """)
+
+    with engine.connect() as connection:
+        rows = connection.execute(query).mappings().all()
+
+    return [
+        {
+            "schema": row["table_schema"],
+            "table": row["table_name"]
+        }
+        for row in rows
+    ]
+
+@app.get("/api/table-columns")
+def get_table_columns():
+
+    query = text("""
+        SELECT
+            column_name,
+            data_type
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = 'analytics_sales'
+        ORDER BY ordinal_position;
+    """)
+
+    with engine.connect() as connection:
+        rows = connection.execute(query).mappings().all()
+
+    return [
+        {
+            "column": row["column_name"],
+            "type": row["data_type"]
+        }
+        for row in rows
+    ]
