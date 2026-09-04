@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from database import engine
+from forecast_model import generate_forecast
+
 
 
 app = FastAPI(title="MarketLens API")
@@ -380,3 +382,101 @@ def get_dashboard(
                 f"{int(kpi_result['total_orders']):,} orders."
         }
     }
+
+
+@app.get("/api/forecast")
+def get_forecast():
+
+    try:
+
+        result = generate_forecast(months=4)
+
+        historical = result["historical"]
+        forecast = result["forecast"]
+        metrics = result["metrics"]
+
+        # Last 5 historical months for chart
+        chart_data = []
+
+        historical_display = historical.tail(5)
+
+        for _, row in historical_display.iterrows():
+
+            chart_data.append({
+                "month": row["date"].strftime("%b %Y"),
+                "actual": round(float(row["sales"]), 2),
+                "predicted": None,
+            })
+
+        # Add future predictions
+        for _, row in forecast.iterrows():
+
+            chart_data.append({
+                "month": row["date"].strftime("%b %Y"),
+                "actual": None,
+                "predicted": round(float(row["sales"]), 2),
+            })
+
+        total_forecast = float(forecast["sales"].sum())
+
+        last_actual = float(historical.iloc[-1]["sales"])
+        first_prediction = float(forecast.iloc[0]["sales"])
+
+        if last_actual > 0:
+            growth = (
+                (first_prediction - last_actual)
+                / last_actual
+            ) * 100
+        else:
+            growth = 0
+
+        return {
+
+            "forecast_data": chart_data,
+
+            "summary": {
+
+                "predicted_revenue": round(
+                    total_forecast,
+                    2
+                ),
+
+                "forecast_growth": round(
+                    growth,
+                    2
+                ),
+
+                "model_accuracy": round(
+                    metrics["accuracy"],
+                    2
+                ),
+
+                "mae": round(
+                    metrics["mae"],
+                    2
+                ),
+
+                "r2_score": round(
+                    metrics["r2"],
+                    4
+                ),
+            },
+
+            "insight": (
+                f"The forecasting model predicts approximately "
+                f"${total_forecast:,.0f} in revenue over the next "
+                f"{len(forecast)} months based on historical sales patterns."
+            ),
+
+            "model": {
+                "name": "Random Forest Regressor",
+                "trained_on": "Historical Superstore sales data",
+                "status": "active",
+            },
+        }
+
+    except Exception as error:
+
+        return {
+            "error": str(error)
+        }
