@@ -17,3 +17,16 @@ frontend/dist/
 
 # OS
 .DS_Store
+
+
+# Frontend build files
+frontend/dist/
+dist/
+
+# Dependencies
+node_modules/
+
+# Python
+venv/
+__pycache__/
+*.pyc
