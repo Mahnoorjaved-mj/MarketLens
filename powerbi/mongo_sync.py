@@ -36,19 +36,39 @@ def sync_collection(db, collection_name: str) -> pd.DataFrame:
     return df
 
 
+def seed_to_mongodb(db):
+    """Seed cleaned sales data from data/processed into MongoDB."""
+    clean_csv = Path(__file__).resolve().parent.parent / "data" / "processed" / "SalesData_clean.csv"
+    if not clean_csv.exists():
+        print(f"⚠️  {clean_csv} not found. Run ETL first.")
+        return
+
+    df = pd.read_csv(clean_csv)
+    records = df.to_dict(orient="records")
+    collection = db["sales"]
+    collection.delete_many({})  # Reset existing
+    collection.insert_many(records)
+    print(f"✅ Loaded {len(records)} records into MongoDB 'sales' collection.")
+
+
 def main():
+    import sys
     print(f"Connecting to MongoDB at {MONGO_URI}...")
-    client = MongoClient(MONGO_URI)
-    db = client[DB_NAME]
+    try:
+        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000)
+        db = client[DB_NAME]
+        
+        # Check if user wants to seed first
+        if "--seed" in sys.argv:
+            seed_to_mongodb(db)
 
-    collections = ["customers", "sales", "forecast_metrics"]
-    for col in collections:
-        try:
+        collections = ["sales", "customers", "forecast_metrics"]
+        for col in collections:
             sync_collection(db, col)
-        except Exception as e:
-            print(f"❌ Error syncing '{col}': {e}")
 
-    print("\n🎉 Sync completed! Refresh your Power BI dashboard to view latest data.")
+        print("\n🎉 Done! Refresh Power BI to load the latest MongoDB data.")
+    except Exception as e:
+        print(f"❌ Connection error: {e}")
 
 
 if __name__ == "__main__":
