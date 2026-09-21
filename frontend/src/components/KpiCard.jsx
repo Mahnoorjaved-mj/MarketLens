@@ -9,31 +9,19 @@ const KpiCard = ({
 }) => {
   return (
     <div className="kpi-card">
-
       <div className="kpi-top">
-
-        <div className="kpi-icon">
+        <div className="kpi-icon-wrapper">
           {icon}
         </div>
-
-        <span
-          className={`kpi-change ${
-            positive ? "positive" : "negative"
-          }`}
-        >
-          {change}
-        </span>
-
+        {change && (
+          <span className={`kpi-badge ${positive ? "kpi-positive" : "kpi-negative"}`}>
+            {change}
+          </span>
+        )}
       </div>
 
-      <div className="kpi-value">
-        {value}
-      </div>
-
-      <div className="kpi-title">
-        {title}
-      </div>
-
+      <div className="kpi-value">{value}</div>
+      <div className="kpi-title">{title}</div>
     </div>
   );
 };

@@ -638,14 +638,25 @@ body {
 .kpi-grid .kpi-card:nth-child(4) { animation-delay: 0.35s; }
 
 .kpi-top { display: flex; align-items: center; justify-content: space-between; }
-.kpi-icon {
-  width: 42px; height: 42px; border-radius: 12px;
+.kpi-icon,
+.kpi-icon-wrapper {
+  width: 44px; height: 44px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(105, 87, 217, 0.1); color: #6957d9;
+  background: rgba(105, 87, 217, 0.12); color: #6957d9;
 }
-.kpi-title { margin-top: 10px; color: #64748b; font-size: 13px; font-weight: 600; }
-.kpi-change.positive { color: #16a34a; font-weight: 700; }
-.kpi-change.negative { color: #dc2626; font-weight: 700; }
+.kpi-title { margin-top: 8px; color: #64748b; font-size: 13px; font-weight: 600; }
+.kpi-change.positive,
+.kpi-badge.kpi-positive {
+  padding: 4px 10px; border-radius: 999px;
+  background: #ecfdf5; color: #16a34a; font-size: 12px; font-weight: 700;
+  border: 1px solid rgba(22, 163, 74, 0.2);
+}
+.kpi-change.negative,
+.kpi-badge.kpi-negative {
+  padding: 4px 10px; border-radius: 999px;
+  background: #fef2f2; color: #dc2626; font-size: 12px; font-weight: 700;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
 
 /* ---- Grids ---- */
 .two-column-grid,
