@@ -398,15 +398,15 @@ body {
 .dashboard-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 22px;
-  margin-bottom: 22px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 .dashboard-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-  margin-bottom: 22px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 /* ================================
@@ -665,8 +665,8 @@ body {
 .bottom-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 22px;
-  margin-bottom: 22px;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 .analytics-grid { grid-template-columns: 2fr 1fr 1fr; }
 .analytics-grid .large-chart { grid-column: span 1; }
@@ -674,10 +674,10 @@ body {
 /* ---- ChartCard (report-card) ---- */
 .report-card {
   background: #fff;
-  border-radius: 18px;
-  padding: 24px;
+  border-radius: 16px;
+  padding: 16px 18px;
   border: 1px solid #edf0f5;
-  box-shadow: 0 5px 20px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
   animation: fadeSlideUp 0.6s ease both;
   transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
@@ -855,17 +855,17 @@ body {
 .powerbi-canvas {
   background: #f8f9fc;
   border: 1px solid #e5e7ef;
-  border-radius: 16px;
-  padding: 28px 28px 8px;
+  border-radius: 14px;
+  padding: 16px 18px 4px;
 }
 
 .report-section-label {
   display: block;
   color: #8a7ecf;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 1.6px;
-  margin: 22px 4px 12px;
+  letter-spacing: 1.4px;
+  margin: 12px 4px 8px;
 }
 .report-section-label:first-child {
   margin-top: 0;
@@ -874,8 +874,8 @@ body {
 .report-inner-card {
   background: transparent;
   border: none;
-  padding: 0 4px 20px;
-  margin-bottom: 20px;
+  padding: 0 4px 12px;
+  margin-bottom: 12px;
   border-bottom: 1px solid #e9ebf3;
 }
 .report-inner-card:last-child {
