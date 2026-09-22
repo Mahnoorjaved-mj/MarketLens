@@ -7,7 +7,9 @@ import {
   Users,
   Package,
   Sparkles,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const Sidebar = () => {
   const menuItems = [
@@ -37,6 +39,10 @@ const Sidebar = () => {
       icon: <Sparkles size={19} />,
     },
   ];
+
+  const { user, logout } = useAuth();
+  const userName = user?.name || "Mahnoor";
+  const userInitial = userName.charAt(0).toUpperCase();
 
   return (
     <aside className="sidebar">
@@ -92,15 +98,26 @@ const Sidebar = () => {
         </div>
 
         <div className="user-card">
-
-          <div className="user-avatar">
-            M
+          <div className="user-card-inner">
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+              <div className="user-avatar">{userInitial}</div>
+              <div style={{ minWidth: 0 }}>
+                <strong style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {userName}
+                </strong>
+                <span style={{ fontSize: "11px", color: "#64748b", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {user?.email || "Workspace User"}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={logout}
+              title="Sign Out"
+              className="user-logout-btn"
+            >
+              <LogOut size={16} />
+            </button>
           </div>
-
-          <div>
-            <strong>Mahnoor</strong>
-          </div>
-
         </div>
 
       </div>
