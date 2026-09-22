@@ -3,12 +3,30 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from sqlalchemy import text
 
-from database import engine
-from forecast_model import generate_forecast
+try:
+    from backend.database import engine, SessionLocal
+    from backend.forecast_model import generate_forecast
+    from backend.auth import router as auth_router, seed_default_user_if_needed
+except ImportError:
+    from database import engine, SessionLocal
+    from forecast_model import generate_forecast
+    from auth import router as auth_router, seed_default_user_if_needed
 
 
 
 app = FastAPI(title="MarketLens API")
+
+app.include_router(auth_router, prefix="/api/auth")
+app.include_router(auth_router, prefix="/auth")
+
+
+@app.on_event("startup")
+def startup_event():
+    db = SessionLocal()
+    try:
+        seed_default_user_if_needed(db)
+    finally:
+        db.close()
 
 
 app.add_middleware(
