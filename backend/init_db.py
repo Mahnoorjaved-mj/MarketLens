@@ -76,12 +76,12 @@ def init_postgres():
             if prod_count == 0:
                 print("Populating 'products' table from analytics_products...")
                 conn.execute(text("""
-                    INSERT INTO products (product_name, category, sub_category, price)
+                    INSERT INTO products (product_id, product_name, category, sub_category)
                     SELECT 
+                        product_id,
                         product_name,
                         category,
-                        sub_category,
-                        avg_sales AS price
+                        sub_category
                     FROM analytics_products
                     ON CONFLICT DO NOTHING;
                 """))

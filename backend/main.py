@@ -1,16 +1,19 @@
+from typing import Optional
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
-
+from pydantic import BaseModel
 from sqlalchemy import text
 
 try:
     from backend.database import engine, SessionLocal
     from backend.forecast_model import generate_forecast
-    from backend.auth import router as auth_router, seed_default_user_if_needed
+    from backend.auth import router as auth_router
+    from backend.init_db import init_postgres
 except ImportError:
     from database import engine, SessionLocal
     from forecast_model import generate_forecast
-    from auth import router as auth_router, seed_default_user_if_needed
+    from auth import router as auth_router
+    from init_db import init_postgres
 
 
 
@@ -22,11 +25,10 @@ app.include_router(auth_router, prefix="/auth")
 
 @app.on_event("startup")
 def startup_event():
-    db = SessionLocal()
     try:
-        seed_default_user_if_needed(db)
-    finally:
-        db.close()
+        init_postgres()
+    except Exception as e:
+        print(f"Postgres startup init note: {e}")
 
 
 app.add_middleware(
@@ -545,3 +547,96 @@ def get_table_columns():
         }
         for row in rows
     ]
+
+
+@app.get("/api/sales")
+def get_sales():
+    with engine.connect() as conn:
+        kpis = conn.execute(text("""
+            SELECT 
+                COALESCE(SUM(sales), 0) AS total_revenue,
+                COALESCE(SUM(profit), 0) AS gross_profit,
+                COALESCE(AVG(sales), 0) AS avg_order_value,
+                COUNT(DISTINCT order_id) AS total_orders
+            FROM analytics_sales;
+        """)).mappings().first()
+
+        monthly = conn.execute(text("""
+            SELECT 
+                TO_CHAR(order_date, 'Mon') AS month,
+                EXTRACT(MONTH FROM order_date) AS m_num,
+                COALESCE(SUM(sales), 0) AS revenue
+            FROM analytics_sales
+            WHERE order_date IS NOT NULL
+            GROUP BY TO_CHAR(order_date, 'Mon'), EXTRACT(MONTH FROM order_date)
+            ORDER BY m_num;
+        """)).mappings().all()
+
+        segments = conn.execute(text("""
+            SELECT 
+                segment AS name,
+                ROUND(SUM(sales)::numeric, 2) AS value
+            FROM analytics_sales
+            WHERE segment IS NOT NULL
+            GROUP BY segment
+            ORDER BY value DESC;
+        """)).mappings().all()
+
+    return {
+        "kpis": dict(kpis) if kpis else {},
+        "revenue_trend": [dict(r) for r in monthly],
+        "distribution": [dict(s) for s in segments],
+    }
+
+
+@app.get("/api/customers")
+def get_customers():
+    with engine.connect() as conn:
+        kpis = conn.execute(text("""
+            SELECT 
+                COUNT(DISTINCT customer_id) AS total_customers,
+                ROUND(AVG(total_spent)::numeric, 2) AS avg_spend
+            FROM analytics_customers;
+        """)).mappings().first()
+
+        list_rows = conn.execute(text("""
+            SELECT 
+                customer_id,
+                customer_name,
+                segment,
+                city,
+                state,
+                region,
+                total_orders,
+                total_spent
+            FROM analytics_customers
+            ORDER BY total_spent DESC
+            LIMIT 50;
+        """)).mappings().all()
+
+    return {
+        "kpis": dict(kpis) if kpis else {},
+        "customers": [dict(c) for c in list_rows],
+    }
+
+
+@app.get("/api/products")
+def get_products():
+    with engine.connect() as conn:
+        top_prods = conn.execute(text("""
+            SELECT 
+                product_id,
+                product_name,
+                category,
+                sub_category,
+                total_sales,
+                total_profit,
+                total_quantity
+            FROM analytics_products
+            ORDER BY total_sales DESC
+            LIMIT 50;
+        """)).mappings().all()
+
+    return {
+        "products": [dict(p) for p in top_prods],
+    }
