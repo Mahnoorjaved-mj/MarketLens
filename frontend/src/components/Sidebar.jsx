@@ -1,68 +1,71 @@
-import { NavLink } from "react-router-dom";
 import React from "react";
-
+import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
-  ChartNoAxesCombined,
+  BarChart3,
   Users,
   Package,
   Sparkles,
-  LogOut,
+  Database,
+  ShieldCheck,
+  TrendingUp,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
 
 const Sidebar = () => {
   const menuItems = [
     {
       name: "Overview",
       path: "/",
-      icon: <LayoutDashboard size={19} />,
+      icon: <LayoutDashboard size={18} />,
+      badge: null,
     },
     {
       name: "Sales Intelligence",
       path: "/sales",
-      icon: <ChartNoAxesCombined size={19} />,
+      icon: <BarChart3 size={18} />,
+      badge: "Live",
     },
     {
       name: "Customers",
       path: "/customers",
-      icon: <Users size={19} />,
+      icon: <Users size={18} />,
+      badge: null,
     },
     {
       name: "Products",
       path: "/products",
-      icon: <Package size={19} />,
+      icon: <Package size={18} />,
+      badge: null,
     },
     {
-      name: "Forecast",
+      name: "AI Forecast",
       path: "/forecast",
-      icon: <Sparkles size={19} />,
+      icon: <Sparkles size={18} />,
+      badge: "ML",
     },
   ];
 
-  const { user, logout } = useAuth();
-  const userName = user?.name || "Mahnoor";
-  const userInitial = userName.charAt(0).toUpperCase();
-
   return (
     <aside className="sidebar">
-
+      {/* Brand Header */}
       <div className="brand">
-
-        <div className="brand-logo">
-          M
+        <div className="brand-logo-container">
+          <div className="brand-logo">
+            <TrendingUp size={20} strokeWidth={2.6} />
+          </div>
+          <span className="brand-ping"></span>
         </div>
-
-        <div>
-          <h2>MarketLens</h2>
-          <span>Analytics Platform</span>
+        <div className="brand-text">
+          <div className="brand-title-row">
+            <h2>MarketLens</h2>
+            <span className="brand-pro-tag">PRO</span>
+          </div>
+          <span className="brand-subtitle">Executive BI & Analytics</span>
         </div>
-
       </div>
 
-      <div className="sidebar-section-title">
-        ANALYTICS
-      </div>
+      {/* Main Navigation */}
+      <div className="sidebar-section-title">MAIN NAVIGATION</div>
 
       <nav className="sidebar-menu">
         {menuItems.map((item) => (
@@ -74,54 +77,48 @@ const Sidebar = () => {
               `sidebar-link ${isActive ? "active" : ""}`
             }
           >
-            {item.icon}
-            <span>{item.name}</span>
+            <span className="sidebar-link-icon">{item.icon}</span>
+            <span className="sidebar-link-text">{item.name}</span>
 
-            {item.name === "Overview" && (
-              <div className="active-dot"></div>
+            {item.badge && (
+              <span className={`sidebar-badge ${item.badge.toLowerCase()}`}>
+                {item.badge}
+              </span>
             )}
+
+            <div className="active-glow-indicator" />
           </NavLink>
         ))}
       </nav>
 
+      {/* Workspace & Connection Info */}
       <div className="sidebar-bottom">
-
+        {/* Data Sync Status */}
         <div className="connection-card">
-
-          <div className="connection-dot"></div>
-
-          <div>
-            <strong>Data Connected</strong>
-            <span>PostgreSQL + Power BI</span>
+          <div className="connection-dot-wrap">
+            <div className="connection-dot" />
+            <div className="connection-ring" />
           </div>
-
-        </div>
-
-        <div className="user-card">
-          <div className="user-card-inner">
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
-              <div className="user-avatar">{userInitial}</div>
-              <div style={{ minWidth: 0 }}>
-                <strong style={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {userName}
-                </strong>
-                <span style={{ fontSize: "11px", color: "#64748b", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {user?.email || "Workspace User"}
-                </span>
-              </div>
+          <div className="connection-info">
+            <div className="connection-header">
+              <Database size={13} className="text-emerald" />
+              <strong>Data Pipeline</strong>
             </div>
-            <button
-              onClick={logout}
-              title="Sign Out"
-              className="user-logout-btn"
-            >
-              <LogOut size={16} />
-            </button>
+            <span>PostgreSQL & Power BI Live</span>
           </div>
         </div>
 
+        {/* Enterprise Workspace Card */}
+        <div className="workspace-card">
+          <div className="workspace-icon">
+            <ShieldCheck size={16} />
+          </div>
+          <div className="workspace-details">
+            <strong>Enterprise Workspace</strong>
+            <span>Active Session • Production</span>
+          </div>
+        </div>
       </div>
-
     </aside>
   );
 };
