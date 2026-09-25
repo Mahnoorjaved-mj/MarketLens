@@ -5,11 +5,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Database connection from environment or fallback
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql://postgres:MarketLens%40123@localhost:5432/marketlens"
 )
+
+# Compatibility fix: SQLAlchemy requires postgresql:// instead of legacy postgres://
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(
     DATABASE_URL,

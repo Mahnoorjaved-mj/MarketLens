@@ -7,3 +7,6 @@ scikit-learn
 numpy
 python-dotenv
 pymongo
+bcrypt
+python-jose[cryptography]
+email-validator
