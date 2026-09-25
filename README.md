@@ -27,6 +27,20 @@
 
 ---
 
+## 📁 Repository Structure
+
+```text
+MarketLens/
+├── backend/       # FastAPI API, ML models (forecasting & anomaly detection), ETL pipeline
+├── data/          # Raw and processed datasets (Superstore sales data)
+├── frontend/      # React + Vite analytics dashboard UI
+├── powerbi/       # Power BI reports (.pbix), theme configurations, and data sync scripts
+├── .gitignore     # Git ignore rules for Python, Node, and environments
+└── README.md      # Project overview and documentation
+```
+
+---
+
 ## 🚀 Quickstart
 
 ### 1. Backend Setup

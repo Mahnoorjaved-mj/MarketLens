@@ -1,5 +1,7 @@
 const fs = require('fs');
-let content = fs.readFileSync('powerbi_layout.json', 'utf8').replace(/^\uFEFF/, '');
+const path = require('path');
+const layoutPath = path.join(__dirname, 'powerbi_layout.json');
+let content = fs.readFileSync(layoutPath, 'utf8').replace(/^\uFEFF/, '');
 const layout = JSON.parse(content);
 const vcs = layout.sections[0].visualContainers;
 
