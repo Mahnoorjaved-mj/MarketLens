@@ -1,9 +1,14 @@
 import os
+import sys
+from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy import text
+
+# Ensure the backend directory is in sys.path so sibling imports work in any environment
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 try:
     from backend.database import engine, SessionLocal
